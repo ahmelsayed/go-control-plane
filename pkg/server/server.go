@@ -215,7 +215,7 @@ func (s *server) process(stream stream, reqCh <-chan *v2.DiscoveryRequest, defau
 	}
 
 	// node may only be set on the first discovery request
-	var node = &core.Node{}
+	var node *core.Node
 
 	for {
 		select {
@@ -296,6 +296,9 @@ func (s *server) process(stream stream, reqCh <-chan *v2.DiscoveryRequest, defau
 				node = req.Node
 			} else {
 				req.Node = node
+			}
+			if req.Node == nil {
+				return status.Errorf(codes.Unavailable, "empty node on new stream")
 			}
 
 			// nonces can be reused across streams; we verify nonce only if nonce is not initialized
